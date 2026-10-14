@@ -74,3 +74,44 @@ export function getExecutableDarwin(pid) {
         });
     });
 }
+
+export function findAllProcessesUnix() {
+    return new Promise((resolve, reject) => {
+        exec(`lsof -nP -iTCP -sTCP:LISTEN -Fpcun`, (error, stdout) => {
+            if (error) {
+                if (!stdout.trim()) {
+                    resolve([]);
+                    return;
+                }
+            }
+
+            const processes = [];
+            let current = null;
+
+            for (const line of stdout.trim().split('\n')) {
+                const key = line[0];
+                const value = line.slice(1);
+
+                if (key === 'p') {
+                    if (current) processes.push(current);
+
+                    current = { pid: value };
+                    continue;
+                }
+
+                if (key === 'c') current.command = value;
+                if (key === 'u') currnet.user = value;
+                if (key === 'n') {
+                    current.address = value;
+
+                    const match = value.match(/:(\d+)$/);
+                    current.port = match ? match[1] : null;
+
+                }
+            }
+
+            if (current) processes.push(current);
+            resolve(processes.filter(p => p.port !== null));
+        })
+    })
+}

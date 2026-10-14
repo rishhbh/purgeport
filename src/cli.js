@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
-import { findProcess } from "./port.js";
-import { killProcess, getProcessInfo, getExecutable } from "./process.js";
-import { ask } from "./prompt.js";
 import packageJson from "../package.json" with { type: "json" };
+import { runSingle } from "./run/single.js";
 
 const args = process.argv.slice(2);
 
@@ -42,33 +40,8 @@ if (!command) {
     process.exit(1);
 }
 
-for (const port of args) {
-    const pid = await findProcess(port);
+if (command === 'all') {
 
-    if (!pid) {
-        console.log(`The port ${port} is not in use.`);
-        continue;
-    }
-
-    const info = await getProcessInfo(pid);
-    const executable = await getExecutable(pid);
-
-    info.process = executable || info.process;
-
-    console.log(`Port ${port} is being used by PID ${pid}.`);
-    console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
-
-    const answer = await ask("Kill this process? [y/n]: ");
-
-    if (answer.trim().toLowerCase() === 'y') {
-        const killed = killProcess(pid);
-
-        if (killed) {
-            console.log(`Process ${pid} terminated.\n`)
-        } else {
-            console.log(`Failed to terminate the process ${pid}.`)
-        }
-    } else {
-        console.log(`Process ${pid} was not terminated.`);
-    }
+} else {
+    runSingle(args);
 }

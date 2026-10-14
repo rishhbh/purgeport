@@ -40,3 +40,7 @@ export function getProcessInfoWin32(pid) {
         });
     });
 }
+
+export function findAllProcessesWin32(port) {
+    //
+}

@@ -1,5 +1,9 @@
 # purgeport
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/rishhbh/purgeport/main/assets/purgeport.png" alt="purgeport" />
+</p>
+
 A CLI tool to find and kill processes occupying network ports.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
@@ -11,9 +15,10 @@ Ever run into `Error: listen EADDRINUSE: address already in use :::3000`? **purg
 ## Features
 
 - **Process Inspection:** Shows the user, full command, and executable path across Linux, macOS, and Windows before asking to terminate.
-- **Cross-Platform Port Lookup:** Uses `lsof` on Unix/macOS and `netstat` on Windows to map ports to PIDs.
+- **Cross-Platform Port Lookup:** Uses `lsof` on Unix/macOS and `netstat` / PowerShell on Windows to map ports to PIDs.
 - **Interactive Confirmation:** Always asks `[y/n]` before terminating any process.
 - **Multi-Port Support:** Check and kill processes on multiple ports in a single run (`purgeport 3000 8080 5000`).
+- **Kill All Listening Processes:** Interactively inspect and terminate processes on all active listening ports (`purgeport all`).
 - **CLI Flag Validation:** Rejects unrecognized flags with a clear error and exit code `1`.
 - **Zero External Dependencies:** Built entirely with Node.js built-ins and native operating system commands.
 
@@ -70,7 +75,8 @@ Command: node server.js
 Process: /home/rishabh/.nvm/versions/node/v20.0.0/bin/node
 
 Kill this process? [y/n]: y
-Process 41280 terminated.
+Process 41280 terminated successfully.
+-----------------------------------------
 ```
 
 ### Kill processes across multiple ports
@@ -78,6 +84,14 @@ Process 41280 terminated.
 ```bash
 purgeport 3000 8080 5000
 ```
+
+### Kill all listening processes interactively
+
+```bash
+purgeport all
+```
+
+Scans every active listening port, displays its process info, and prompts for confirmation for each process.
 
 ### CLI Options
 
@@ -99,8 +113,8 @@ Try 'purgeport --help' for available options.
 ## How It Works
 
 1. **Port resolution:**
-   - **Linux / macOS:** Runs `lsof -i :<port> -t` to locate the PID.
-   - **Windows:** Runs `netstat -ano | findstr :<port>` and parses the listening PID.
+   - **Linux / macOS:** Runs `lsof -i :<port> -t` for specific ports, or `lsof -nP -iTCP -sTCP:LISTEN -Fpn` for `purgeport all`.
+   - **Windows:** Runs `netstat -ano | findstr :<port>` for specific ports, or PowerShell `Get-NetTCPConnection -State Listen` for `purgeport all`.
 2. **Process inspection:**
    - **Linux:** Reads `/proc/<pid>/exe` for the binary path and runs `ps -p <pid> -o user=,comm=,args=` for owner and command args.
    - **macOS:** Runs `lsof -p <pid> -d txt -Fn` for the binary path and `ps -p <pid> -o user=,comm=,args=` for owner and command args.
@@ -133,21 +147,7 @@ cd purgeport
 npm link
 ```
 
-Now you can test `purgeport <port>` directly.
-
----
-
-## Roadmap
-
-Planned features and known gaps:
-
-- **`purgeport all`:** Automatically discover and kill all processes currently listening on network ports.
-- **Native Windows Termination Fallback:** Add `taskkill /F /PID` fallback if `SIGTERM` fails on stubborn Windows services.
-- **Force Mode (`-f` / `--force`):** Bypass confirmation prompt for scripts and CI pipelines.
-- **Configurable Kill Signals (`-s` / `--signal`):** Fallback from `SIGTERM` to `SIGKILL` (`kill -9`) for hung processes.
-- **Multi-PID Handling:** Detect and terminate multiple processes sharing or bound to the same port.
-- **Port Ranges:** Support scanning port ranges (e.g. `purgeport 3000-3005`).
-- **Protocol Filtering:** Add `--tcp` or `--udp` filters.
+Now you can test `purgeport <port>` or `purgeport all` directly.
 
 ---
 

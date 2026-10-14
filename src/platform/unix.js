@@ -86,28 +86,29 @@ export function findAllProcessesUnix() {
             }
 
             const processes = [];
-            let current = null;
+            let pid = null;
 
-            for (const line of stdout.trim().split('\n')) {
+            for (const line of stdout.trim().split(/\r?\n/)) {
                 const key = line[0];
                 const value = line.slice(1);
 
                 if (key === 'p') {
-                    if (current) processes.push(current);
-                    
-                    current = { pid: value };
-                    continue;
+                    pid = value;
                 }
 
-                if (key === 'n') {
+                if (key === 'n' && pid) {
                     const match = value.match(/:(\d+)$/);
-                    current.port = match ? match[1] : null;
 
+                    if (match) {
+                        processes.push({
+                            pid,
+                            port: match[1]
+                        });
+                    }
                 }
             }
-
-            if (current) processes.push(current);
-            resolve(processes.filter(p => p.port !== null));
-        })
-    })
+            
+            resolve(processes);
+        });
+    });
 }

@@ -41,6 +41,23 @@ export function getProcessInfoWin32(pid) {
     });
 }
 
-export function findAllProcessesWin32(port) {
-    //
+export function findAllProcessesWin32() {
+    return new Promise((resolve, reject) => {
+        const command = `powershell -NoProfile -Command "Get-NetTCPConnection -State Listen | Select-Object @{Name='pid'; Expression={$_.OwningProcess}}, @{Name='port'; Expression={$_.LocalPort}} | ConvertTo-Json -Compress"`;
+        exec(command, (error, stdout) => {
+            if (error) {
+                reject(error);
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(stdout.trim() || "[]");
+                const processes = Array.isArray(parsed) ? parsed : [parsed];
+                
+                resolve(processes);
+            } catch (err) {
+                reject(new Error(`Failed to find listening processes: ${err.message}.`));
+            }
+        });
+    });
 }

@@ -42,7 +42,7 @@ if (!command) {
 }
 
 if (command === 'all') {
-    runAll();
+    await runAll();
 } else {
-    runSingle(args);
+    await runSingle(args);
 }

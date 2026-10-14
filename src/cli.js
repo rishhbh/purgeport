@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import packageJson from "../package.json" with { type: "json" };
+import { runAll } from "./run/all.js";
 import { runSingle } from "./run/single.js";
 
 const args = process.argv.slice(2);
@@ -41,7 +42,7 @@ if (!command) {
 }
 
 if (command === 'all') {
-
+    runAll();
 } else {
     runSingle(args);
 }

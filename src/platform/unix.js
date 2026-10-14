@@ -77,7 +77,7 @@ export function getExecutableDarwin(pid) {
 
 export function findAllProcessesUnix() {
     return new Promise((resolve, reject) => {
-        exec(`lsof -nP -iTCP -sTCP:LISTEN -Fpcun`, (error, stdout) => {
+        exec(`lsof -nP -iTCP -sTCP:LISTEN -Fpn`, (error, stdout) => {
             if (error) {
                 if (!stdout.trim()) {
                     resolve([]);
@@ -94,16 +94,12 @@ export function findAllProcessesUnix() {
 
                 if (key === 'p') {
                     if (current) processes.push(current);
-
+                    
                     current = { pid: value };
                     continue;
                 }
 
-                if (key === 'c') current.command = value;
-                if (key === 'u') currnet.user = value;
                 if (key === 'n') {
-                    current.address = value;
-
                     const match = value.match(/:(\d+)$/);
                     current.port = match ? match[1] : null;
 

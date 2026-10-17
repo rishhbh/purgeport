@@ -1,6 +1,6 @@
 {
   "name": "purgeport",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "Find and kill the processes occupying ports.",
   "bin": {
     "purgeport": "./src/cli.js"

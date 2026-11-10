@@ -1,24 +1,22 @@
 import { exec } from "node:child_process";
 
 export function findProcessWin32(port) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
         exec(`netstat -ano | findstr :${port}`, (error, stdout) => {
-            if (error) {
-                resolve(null);
+            if (error || !stdout.trim()) {
+                resolve([]);
                 return;
             }
 
-            const lines = stdout.trim().split("\n");
+            const pids = [...new Set(
+                stdout
+                    .trim()
+                    .split(/\r?\n/)
+                    .map(line => line.trim().split(/\s+/).pop())
+                    .filter(pid => pid && /^\d+$/.test(pid) && pid !== "0")
+            )];
 
-            if (!lines.length) {
-                resolve(null);
-                return
-            }
-
-            const parts = lines[0].trim().split(/\s+/);
-            const pid = parts[parts.length - 1];
-
-            resolve(pid || null);
+            resolve(pids);
         });
     });
 }

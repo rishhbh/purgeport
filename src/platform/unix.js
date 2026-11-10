@@ -3,14 +3,14 @@ import { exec } from "node:child_process";
 export function findProcessUnix(port) {
     return new Promise((resolve, reject) => {
         exec(`lsof -i :${port} -t`, (error, stdout) => {
-            if (error) {
-                resolve(null);
+            if (error || !stdout.trim()) {
+                resolve([]);
                 return;
             }
 
-            const pid = stdout.trim();
+            const pids = [...new Set(stdout.trim().split(/\r?\n/).filter(Boolean))];
 
-            resolve(pid || null);
+            resolve(pids);
         });
     });
 }
@@ -107,7 +107,7 @@ export function findAllProcessesUnix() {
                     }
                 }
             }
-            
+
             resolve(processes);
         });
     });

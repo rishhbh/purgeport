@@ -8,46 +8,53 @@ import { ask } from "../prompt.js";
 
 export async function runSingle(args, { skipConfirmation = false } = {}) {
     for (const port of args) {
-        let confirmed = skipConfirmation;
 
         if (!isValidPort(port)) {
             console.error(`Invalid port: ${port}.`);
             continue;
         }
 
-        const pid = await findProcess(port);
+        const pids = await findProcess(port);
 
-        if (!pid) {
+        if (!pids || pids.length === 0) {
             console.log(`The port ${port} is not in use.`);
             continue;
         }
 
-        const info = await getProcessInfo(pid);
-        const executable = await getExecutable(pid);
+        for (const pid of pids) {
+            try {
+                const info = await getProcessInfo(pid);
+                const executable = await getExecutable(pid);
 
-        info.process = executable || info.process;
+                let confirmed = skipConfirmation;
 
-        console.log(`Port ${port} is being used by PID ${pid}.`);
-        console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
+                info.process = executable || info.process;
 
-        if (!skipConfirmation) {
-            const answer = await ask("Kill this process? [y/n]: ");
-            confirmed = answer.trim().toLowerCase() === 'y';
-        }
+                console.log(`Port ${port} is being used by PID ${pid}.`);
+                console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
 
-        if (confirmed) {
-            const killed = killProcess(pid);
+                if (!skipConfirmation) {
+                    const answer = await ask("Kill this process? [y/n]: ");
+                    confirmed = answer.trim().toLowerCase() === 'y';
+                }
 
-            if (killed) {
-                console.log(`Process ${pid} terminated successfully.`)
-                console.log(`-----------------------------------------`);
-            } else {
-                console.log(`Failed to terminate the process ${pid}.`)
+                if (confirmed) {
+                    const killed = killProcess(pid);
+
+                    if (killed) {
+                        console.log(`Process ${pid} terminated successfully.`)
+                        console.log(`-----------------------------------------`);
+                    } else {
+                        console.log(`Failed to terminate the process ${pid}.`)
+                    }
+
+                } else {
+                    console.log(`Process ${pid} was not terminated.`);
+                    console.log(`------------------------------------`);
+                }
+            } catch (error) {
+                console.error(`Failed to inspect process ${pid}: ${error.message}`);
             }
-
-        } else {
-            console.log(`Process ${pid} was not terminated.`);
-            console.log(`------------------------------------`);
         }
     }
 }

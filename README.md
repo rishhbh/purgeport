@@ -16,7 +16,8 @@ Ever run into `Error: listen EADDRINUSE: address already in use :::3000`? **purg
 
 - **Process Inspection:** Shows the user, full command, and executable path across Linux, macOS, and Windows before asking to terminate.
 - **Cross-Platform Port Lookup:** Uses `lsof` on Unix/macOS and `netstat` / PowerShell on Windows to map ports to PIDs.
-- **Interactive Confirmation:** Always asks `[y/n]` before terminating any process.
+- **Interactive Confirmation:** Prompts before terminating any process, with the ability to bypass via `-y` / `--yes`.
+- **Non-Interactive Mode:** Pass `-y` or `--yes` to skip confirmation prompts, ideal for CI/CD pipelines, automated scripts, or npm predev hooks.
 - **Multi-Port Support:** Check and kill processes on multiple ports in a single run (`purgeport 3000 8080 5000`).
 - **Kill All Listening Processes:** Interactively inspect and terminate processes on all active listening ports (`purgeport all`).
 - **CLI Flag Validation:** Rejects unrecognized flags with a clear error and exit code `1`.
@@ -85,6 +86,18 @@ Process 41280 terminated successfully.
 purgeport 3000 8080 5000
 ```
 
+### Skip confirmation prompts (Non-interactive / CI)
+
+Use `-y` or `--yes` to immediately terminate processes without interactive prompts:
+
+```bash
+purgeport 3000 -y
+purgeport 3000 8080 --yes
+```
+
+> [!CAUTION]
+> Using `purgeport all -y` terminates **all** listening processes across the entire machine without confirmation. Use with care.
+
 ### Kill all listening processes interactively
 
 ```bash
@@ -98,6 +111,7 @@ Scans every active listening port, displays its process info, and prompts for co
 ```bash
 purgeport --help       # Show help message
 purgeport --version    # Show installed version
+purgeport -y, --yes    # Skip confirmation prompts
 ```
 
 Unrecognized flags exit with an error:
@@ -120,7 +134,7 @@ Try 'purgeport --help' for available options.
    - **macOS:** Runs `lsof -p <pid> -d txt -Fn` for the binary path and `ps -p <pid> -o user=,comm=,args=` for owner and command args.
    - **Windows:** Uses PowerShell CIM (`Get-CimInstance Win32_Process`) to extract `ExecutablePath`, `CommandLine`, and process owner (`GetOwner`).
 3. **Termination:**
-   - Sends `process.kill(pid, "SIGTERM")` once confirmed with `y`.
+   - Sends `process.kill(pid, "SIGTERM")` once confirmed with `y` or immediately if `-y` / `--yes` is supplied.
 
 ---
 

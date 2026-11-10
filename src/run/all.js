@@ -8,10 +8,17 @@ import { findAllProcesses } from "../port.js";
 import { killProcess } from "../process.js";
 import { ask } from "../prompt.js";
 
-export async function runAll() {
+export async function runAll({ skipConfirmation = false } = {}) {
     const processes = await findAllProcesses();
+    const killedPids = new Set();
 
     for (const proc of processes) {
+        let confirmed = skipConfirmation;
+
+        if (killedPids.has(proc.pid)) {
+            continue;
+        }
+
         try {
             const command = process.platform === 'win32' ? await getProcessInfoWin32(Number(proc.pid)) : await getProcessInfoUnix(Number(proc.pid));
 
@@ -26,14 +33,18 @@ export async function runAll() {
             console.log(`Port ${details.port} is being used by PID ${details.pid}.`);
             console.log(`\nUser: ${details.user}\nCommand: ${details.args}\nProcess: ${details.process}\n`);
 
-            const answer = await ask("Kill this process? [y/n]: ");
+            if (!skipConfirmation) {
+                const answer = await ask("Kill this process? [y/n]: ");
+                confirmed = answer.trim().toLowerCase() === 'y';
+            }
 
-            if (answer.trim().toLowerCase() === 'y') {
+            if (confirmed) {
                 const killed = killProcess(proc.pid);
 
                 if (killed) {
                     console.log(`Process ${details.pid} terminated successfully.`)
                     console.log(`-----------------------------------------`);
+                    killedPids.add(proc.pid);
                 } else {
                     console.log(`Failed to terminate the process ${details.pid}.`)
                 }
@@ -43,6 +54,7 @@ export async function runAll() {
                 console.log(`------------------------------------`);
             }
         } catch (error) {
+            console.error(`Failed to inspect process ${proc.pid}: ${error.message}`);
             continue;
         }
     }

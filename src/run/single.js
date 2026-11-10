@@ -6,13 +6,15 @@ import {
 import { findProcess, isValidPort } from "../port.js";
 import { ask } from "../prompt.js";
 
-export async function runSingle(args) {
+export async function runSingle(args, { skipConfirmation = false } = {}) {
     for (const port of args) {
-        if(!isValidPort(port)){
+        let confirmed = skipConfirmation;
+
+        if (!isValidPort(port)) {
             console.error(`Invalid port: ${port}.`);
             continue;
         }
-        
+
         const pid = await findProcess(port);
 
         if (!pid) {
@@ -28,9 +30,12 @@ export async function runSingle(args) {
         console.log(`Port ${port} is being used by PID ${pid}.`);
         console.log(`\nUser: ${info.user}\nCommand: ${info.args}\nProcess: ${info.process}\n`);
 
-        const answer = await ask("Kill this process? [y/n]: ");
+        if (!skipConfirmation) {
+            const answer = await ask("Kill this process? [y/n]: ");
+            confirmed = answer.trim().toLowerCase() === 'y';
+        }
 
-        if (answer.trim().toLowerCase() === 'y') {
+        if (confirmed) {
             const killed = killProcess(pid);
 
             if (killed) {

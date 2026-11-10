@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-11-10
+
+### Added
+- **Non-Interactive Confirmation Flag (`-y`, `--yes`):** Added support for `-y` and `--yes` CLI options to bypass interactive prompts and terminate matching processes immediately, ideal for CI/CD pipelines, npm lifecycle scripts (e.g., `"predev"`), and automated environments.
+- **Position-Independent Flag Parsing:** Allows flags to be placed anywhere in the argument list (e.g., `purgeport 3000 -y`, `purgeport -y 3000`, `purgeport all -y`).
+
+### Fixed
+- **Multi-Port Process Handling in `runAll`:** Tracks terminated PIDs across the batch execution to avoid redundant inspection errors when a single process is bound to multiple listening ports.
+- **Safe Parameter Defaults:** Added default empty objects (`= {}`) to [`runSingle`](src/run/single.js) and [`runAll`](src/run/all.js) options to prevent destructuring runtime errors when invoked programmatically without arguments.
+
 ## [1.0.0] - 2026-10-15
 
 ### Added
@@ -53,6 +63,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI Options:** Built-in `-h`, `--help` and `-v`, `--version` flags.
 - **Executable Binary:** Executable `purgeport` binary setup via `package.json` pointing to `src/cli.js`.
 
+[1.1.0]: https://github.com/rishhbh/purgeport/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rishhbh/purgeport/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/rishhbh/purgeport/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/rishhbh/purgeport/releases/tag/v0.1.0

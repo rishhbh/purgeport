@@ -3,6 +3,7 @@
 import packageJson from "../package.json" with { type: "json" };
 import { runAll } from "./run/all.js";
 import { runSingle } from "./run/single.js";
+import { ansi } from "./formatting.js";
 
 const args = process.argv.slice(2);
 
@@ -17,18 +18,18 @@ const skipConfirmation = args.includes("-y") || args.includes("--yes");
 const unknownOptions = args.find(arg => arg.startsWith("-") && !options.includes(arg));
 
 if (args.includes("--version") || args.includes("-v")) {
-    console.log(packageJson.version);
+    console.log(ansi.bold(`purgeport v${packageJson.version}`));
     process.exit(0);
 }
 
 if (args.includes('--help') || args.includes('-h')) {
-    console.log(`purgeport - Kill processes using network ports
+    console.log(`${ansi.bold("purgeport")} - Kill processes using network ports
 
-Usage:
+${ansi.dim("Usage")}
   purgeport <port>...
   purgeport all
 
-Options:
+${ansi.dim("Options")}
   -h, --help       Show help
   -v, --version    Show version
   -y, --yes        Skip confirmation prompts`);
@@ -47,8 +48,8 @@ const positionalArgs = args.filter(arg => !options.includes(arg));
 const command = positionalArgs[0];
 
 if (!command) {
-    console.log(`Usage:
-- purgeport <port>
+    console.log(`${ansi.dim("Usage")}
+- purgeport <port>...
 - purgeport all`);
 
     process.exit(1);

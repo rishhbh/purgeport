@@ -18,8 +18,9 @@ Ever run into `Error: listen EADDRINUSE: address already in use :::3000`? **purg
 - **Cross-Platform Port Lookup:** Uses `lsof` on Unix/macOS and `netstat` / PowerShell on Windows to map ports to PIDs.
 - **Interactive Confirmation:** Prompts before terminating any process, with the ability to bypass via `-y` / `--yes`.
 - **Non-Interactive Mode:** Pass `-y` or `--yes` to skip confirmation prompts, ideal for CI/CD pipelines, automated scripts, or npm predev hooks.
-- **Multi-Port Support:** Check and kill processes on multiple ports in a single run (`purgeport 3000 8080 5000`).
+- **Multi-Port & Multi-Process Support:** Check and kill processes across multiple ports in a single run (`purgeport 3000 8080 5000`), handling multiple processes bound to a port.
 - **Kill All Listening Processes:** Interactively inspect and terminate processes on all active listening ports (`purgeport all`).
+- **Rich Terminal Styling:** Color-coded terminal output with bold identifiers, dimmed metadata, and clear status messages. Automatically suppresses ANSI escape sequences when output is piped or redirected.
 - **CLI Flag Validation:** Rejects unrecognized flags with a clear error and exit code `1`.
 - **Zero External Dependencies:** Built entirely with Node.js built-ins and native operating system commands.
 
@@ -71,9 +72,9 @@ When a process is found, its details are printed before asking for confirmation:
 ```text
 Port 3000 is being used by PID 41280.
 
-User: rishabh
-Command: node server.js
-Process: /home/rishabh/.nvm/versions/node/v20.0.0/bin/node
+User     rishabh
+Command  node server.js
+Process  /home/rishabh/.nvm/versions/node/v20.0.0/bin/node
 
 Kill this process? [y/n]: y
 Process 41280 terminated successfully.
@@ -121,6 +122,15 @@ $ purgeport --foo
 Unknown option: --foo
 Try 'purgeport --help' for available options.
 ```
+
+### Environment Variables
+
+`purgeport` detects terminal capabilities and supports standard color environment variables:
+
+| Variable | Description |
+| :--- | :--- |
+| `NO_COLOR` | When set, suppresses all ANSI color and text formatting ([no-color.org](https://no-color.org/)). |
+| `FORCE_COLOR` | Set to `1` (or any value other than `0`) to force color output even when piped or in CI environments. Set to `0` to disable color. |
 
 ---
 

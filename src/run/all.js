@@ -7,6 +7,7 @@ import { getProcessInfoWin32 } from "../platform/windows.js";
 import { findAllProcesses } from "../port.js";
 import { killProcess } from "../process.js";
 import { ask } from "../prompt.js";
+import { ansi } from "../formatting.js";
 
 export async function runAll({ skipConfirmation = false } = {}) {
     const processes = await findAllProcesses();
@@ -30,11 +31,11 @@ export async function runAll({ skipConfirmation = false } = {}) {
                 details.process = await getExecutableDarwin(Number(proc.pid));
             }
 
-            console.log(`Port ${details.port} is being used by PID ${details.pid}.`);
-            console.log(`\nUser: ${details.user}\nCommand: ${details.args}\nProcess: ${details.process}\n`);
+            console.log(`Port ${ansi.bold(details.port)} is being used by PID ${ansi.bold(proc.pid)}.`);
+            console.log(`\n${ansi.dim("User")}     ${details.user}\n${ansi.dim("Command")}  ${details.args}\n${ansi.dim("Process")}  ${details.process}\n`);
 
             if (!skipConfirmation) {
-                const answer = await ask("Kill this process? [y/n]: ");
+                const answer = await ask(ansi.yellow("Kill this process? [y/n]: "));
                 confirmed = answer.trim().toLowerCase() === 'y';
             }
 
@@ -42,19 +43,19 @@ export async function runAll({ skipConfirmation = false } = {}) {
                 const killed = killProcess(proc.pid);
 
                 if (killed) {
-                    console.log(`Process ${details.pid} terminated successfully.`)
-                    console.log(`-----------------------------------------`);
+                    console.log(ansi.green(`Process ${details.pid} terminated successfully.`));
+                    console.log(ansi.dim("-----------------------------------------"));
                     killedPids.add(proc.pid);
                 } else {
-                    console.log(`Failed to terminate the process ${details.pid}.`)
+                    console.log(ansi.red(`Failed to terminate the process ${details.pid}.`))
                 }
 
             } else {
-                console.log(`Process ${details.pid} was not terminated.`);
-                console.log(`------------------------------------`);
+                console.log(ansi.red(`Process ${details.pid} was not terminated.`));
+                console.log(ansi.dim(`-----------------------------------------`));
             }
         } catch (error) {
-            console.error(`Failed to inspect process ${proc.pid}: ${error.message}`);
+            console.error(ansi.red(`Failed to inspect process ${proc.pid}: ${error.message}.`));
             continue;
         }
     }

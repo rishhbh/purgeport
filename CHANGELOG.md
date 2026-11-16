@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2026-11-16
+
+### Added
+- **ANSI Terminal Formatting:** Enhanced CLI output with clean, zero-dependency ANSI formatting: bold highlights for ports and PIDs, dimmed labels and dividers, yellow confirmation prompts, green success messages, cyan informational notices, and red error alerts.
+- **Color & TTY Detection:** Automatically detects whether stdout is an interactive TTY and suppresses ANSI escape codes when output is piped, redirected to a file, or running in dumb terminals (`TERM=dumb`).
+- **Standard Color Flag Support:** Full support for `NO_COLOR` ([no-color.org](https://no-color.org/)) and `FORCE_COLOR` environment variables.
+- **Safe Style Nesting:** Implemented attribute-specific ANSI closing codes (`\x1b[22m` for bold/dim, `\x1b[39m` for foreground colors) so nested styles compose cleanly without clearing outer colors.
+- **Graceful SIGINT Handling:** Added custom `SIGINT` (Ctrl+C) handler during confirmation prompts to display an informative cancellation notice and exit cleanly with status code 130.
+
+### Changed
+- **CLI Output Polish:** Styled `--help` and `--version` outputs (`purgeport v1.2.0`), updated usage hints to `<port>...` to reflect multi-port support, and aligned formatting and divider lengths across single and batch runs.
+
+## [1.1.1] - 2026-11-13
+
+### Fixed
+- **Multiple Processes per Port:** Updated `findProcessUnix` (`lsof`) and `findProcessWin32` (`netstat`) to return an array of unique PIDs, supporting ports occupied by multiple processes across Unix and Windows.
+- **Per-Process Confirmation:** Iterates over all discovered PIDs in `runSingle` with individual confirmation prompts.
+- **Inspection Error Boundaries:** Added try/catch error handling around process inspection in `runSingle` to gracefully handle terminated or restricted processes.
+
 ## [1.1.0] - 2026-11-10
 
 ### Added
@@ -63,6 +82,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI Options:** Built-in `-h`, `--help` and `-v`, `--version` flags.
 - **Executable Binary:** Executable `purgeport` binary setup via `package.json` pointing to `src/cli.js`.
 
+[1.2.0]: https://github.com/rishhbh/purgeport/compare/v1.1.1...v1.2.0
+[1.1.1]: https://github.com/rishhbh/purgeport/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/rishhbh/purgeport/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/rishhbh/purgeport/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/rishhbh/purgeport/compare/v0.1.0...v0.2.0

@@ -8,14 +8,20 @@ import { ansi } from "./formatting.js";
 const args = process.argv.slice(2);
 
 const options = [
+    "-f", "--force",
     "-y", "--yes",
     "-h", "--help",
     "-v", "--version"
 ];
 
 const skipConfirmation = args.includes("-y") || args.includes("--yes");
-
+const force = args.includes("-f") || args.includes("--force");
 const unknownOptions = args.find(arg => arg.startsWith("-") && !options.includes(arg));
+
+const executionOptions = {
+    skipConfirmation,
+    force
+};
 
 if (args.includes("--version") || args.includes("-v")) {
     console.log(ansi.bold(`purgeport v${packageJson.version}`));
@@ -30,6 +36,7 @@ ${ansi.dim("Usage")}
   purgeport all
 
 ${ansi.dim("Options")}
+  -f, --force      Forcefully terminate processes (SIGKILL)
   -h, --help       Show help
   -v, --version    Show version
   -y, --yes        Skip confirmation prompts`);
@@ -56,7 +63,7 @@ if (!command) {
 }
 
 if (command === 'all') {
-    await runAll({ skipConfirmation });
+    await runAll(executionOptions);
 } else {
-    await runSingle(positionalArgs, { skipConfirmation });
+    await runSingle(positionalArgs, executionOptions);
 }

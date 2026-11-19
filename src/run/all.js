@@ -9,12 +9,12 @@ import { killProcess } from "../process.js";
 import { ask } from "../prompt.js";
 import { ansi } from "../formatting.js";
 
-export async function runAll({ skipConfirmation = false } = {}) {
+export async function runAll({ skipConfirmation = false, force = false } = {}) {
     const processes = await findAllProcesses();
     const killedPids = new Set();
 
     for (const proc of processes) {
-        let confirmed = skipConfirmation;
+        let confirmed = skipConfirmation && !force;
 
         if (killedPids.has(proc.pid)) {
             continue;
@@ -34,16 +34,21 @@ export async function runAll({ skipConfirmation = false } = {}) {
             console.log(`Port ${ansi.bold(details.port)} is being used by PID ${ansi.bold(proc.pid)}.`);
             console.log(`\n${ansi.dim("User")}     ${details.user}\n${ansi.dim("Command")}  ${details.args}\n${ansi.dim("Process")}  ${details.process}\n`);
 
-            if (!skipConfirmation) {
-                const answer = await ask(ansi.yellow("Kill this process? [y/n]: "));
+            if (!confirmed) {
+                const answer = await ask(
+                    force
+                        ? ansi.red("Forcefully terminate this process? [y/n]: ")
+                        : ansi.yellow("Kill this process? [y/n]: ")
+                );
+
                 confirmed = answer.trim().toLowerCase() === 'y';
             }
 
             if (confirmed) {
-                const killed = killProcess(proc.pid);
+                const killed = killProcess(proc.pid, force);
 
                 if (killed) {
-                    console.log(ansi.green(`Process ${details.pid} terminated successfully.`));
+                    console.log(ansi.green(`Process ${ansi.bold(details.pid)} terminated successfully.`));
                     console.log(ansi.dim("-----------------------------------------"));
                     killedPids.add(proc.pid);
                 } else {
@@ -51,7 +56,7 @@ export async function runAll({ skipConfirmation = false } = {}) {
                 }
 
             } else {
-                console.log(ansi.red(`Process ${details.pid} was not terminated.`));
+                console.log(ansi.red(`Process ${ansi.bold(details.pid)} was not terminated.`));
                 console.log(ansi.dim(`-----------------------------------------`));
             }
         } catch (error) {

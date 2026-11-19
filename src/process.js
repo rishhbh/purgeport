@@ -2,9 +2,13 @@ import { getExecutableDarwin, getProcessInfoUnix } from "./platform/unix.js";
 import { getProcessInfoWin32 } from "./platform/windows.js";
 import { getExecutableLinux } from "./platform/unix.js";
 
-export function killProcess(pid) {
+export function killProcess(pid, force = false) {
     try {
-        process.kill(Number(pid), "SIGTERM");
+        process.kill(
+            Number(pid),
+            force ? "SIGKILL" : "SIGTERM"
+        );
+
         return true;
     } catch (err) {
         console.error(err)

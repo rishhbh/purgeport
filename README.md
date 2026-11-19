@@ -17,6 +17,7 @@ Ever run into `Error: listen EADDRINUSE: address already in use :::3000`? **purg
 - **Process Inspection:** Shows the user, full command, and executable path across Linux, macOS, and Windows before asking to terminate.
 - **Cross-Platform Port Lookup:** Uses `lsof` on Unix/macOS and `netstat` / PowerShell on Windows to map ports to PIDs.
 - **Interactive Confirmation:** Prompts before terminating any process, with the ability to bypass via `-y` / `--yes`.
+- **Forceful Termination:** Pass `-f` or `--force` to send `SIGKILL` instead of `SIGTERM`. For safety, forceful termination always requires confirmation even if `-y` is supplied.
 - **Non-Interactive Mode:** Pass `-y` or `--yes` to skip confirmation prompts, ideal for CI/CD pipelines, automated scripts, or npm predev hooks.
 - **Multi-Port & Multi-Process Support:** Check and kill processes across multiple ports in a single run (`purgeport 3000 8080 5000`), handling multiple processes bound to a port.
 - **Kill All Listening Processes:** Interactively inspect and terminate processes on all active listening ports (`purgeport all`).
@@ -99,6 +100,32 @@ purgeport 3000 8080 --yes
 > [!CAUTION]
 > Using `purgeport all -y` terminates **all** listening processes across the entire machine without confirmation. Use with care.
 
+### Forcefully terminate processes (`-f`, `--force`)
+
+By default, `purgeport` attempts a graceful termination by sending `SIGTERM`. If a process is unresponsive or stubborn, pass `-f` or `--force` to send `SIGKILL`:
+
+```bash
+purgeport 3000 -f
+purgeport 3000 --force
+```
+
+A red confirmation prompt is displayed before forcefully terminating:
+
+```text
+Port 3000 is being used by PID 41280.
+
+User     rishabh
+Command  node server.js
+Process  /home/rishabh/.nvm/versions/node/v20.0.0/bin/node
+
+Forcefully terminate this process? [y/n]: y
+Process 41280 terminated successfully.
+-----------------------------------------
+```
+
+> [!NOTE]
+> Because `SIGKILL` terminates processes immediately and cannot be caught, interactive confirmation is always required when `--force` is used, even if `-y` / `--yes` is supplied.
+
 ### Kill all listening processes interactively
 
 ```bash
@@ -113,6 +140,7 @@ Scans every active listening port, displays its process info, and prompts for co
 purgeport --help       # Show help message
 purgeport --version    # Show installed version
 purgeport -y, --yes    # Skip confirmation prompts
+purgeport -f, --force  # Forcefully terminate processes (SIGKILL)
 ```
 
 Unrecognized flags exit with an error:
@@ -144,7 +172,7 @@ Try 'purgeport --help' for available options.
    - **macOS:** Runs `lsof -p <pid> -d txt -Fn` for the binary path and `ps -p <pid> -o user=,comm=,args=` for owner and command args.
    - **Windows:** Uses PowerShell CIM (`Get-CimInstance Win32_Process`) to extract `ExecutablePath`, `CommandLine`, and process owner (`GetOwner`).
 3. **Termination:**
-   - Sends `process.kill(pid, "SIGTERM")` once confirmed with `y` or immediately if `-y` / `--yes` is supplied.
+   - Sends `process.kill(pid, "SIGKILL")` when `-f` / `--force` is used, or `process.kill(pid, "SIGTERM")` by default. Prompts for confirmation unless `-y` / `--yes` is used without `--force`.
 
 ---
 

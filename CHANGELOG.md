@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.3.0] - 2026-11-20
+
+### Added
+- **Forceful Termination Flag (`-f`, `--force`):** Added `-f` and `--force` CLI options to forcefully terminate processes with `SIGKILL` (signal 9) instead of `SIGTERM` (signal 15).
+- **Mandatory Force Confirmation:** Prompts with a distinct red confirmation alert (`Forcefully terminate this process? [y/n]: `) before issuing `SIGKILL`. For safety against uncatchable termination, confirmation is required even when `-y` / `--yes` is supplied.
+- **Help Menu Updates:** Added `-f, --force` to `--help` output with usage descriptions.
+
 ## [1.2.0] - 2026-11-16
 
 ### Added
@@ -82,6 +89,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **CLI Options:** Built-in `-h`, `--help` and `-v`, `--version` flags.
 - **Executable Binary:** Executable `purgeport` binary setup via `package.json` pointing to `src/cli.js`.
 
+[1.3.0]: https://github.com/rishhbh/purgeport/compare/v1.2.0...v1.3.0
 [1.2.0]: https://github.com/rishhbh/purgeport/compare/v1.1.1...v1.2.0
 [1.1.1]: https://github.com/rishhbh/purgeport/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/rishhbh/purgeport/compare/v1.0.0...v1.1.0

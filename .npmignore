@@ -7,3 +7,6 @@ node_modules/
 !.env.example
 coverage/
 assets/
+.editorconfig
+CONTRIBUTING.md
+SECURITY.md

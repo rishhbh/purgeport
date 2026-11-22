@@ -7,6 +7,8 @@
 A CLI tool to find and kill processes occupying network ports.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![CI](https://github.com/rishhbh/purgeport/actions/workflows/ci.yml/badge.svg)](https://github.com/rishhbh/purgeport/actions/workflows/ci.yml)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 Ever run into `Error: listen EADDRINUSE: address already in use :::3000`? **purgeport** finds whatever process is holding the port, shows you what it is, and kills it after you confirm.
 
@@ -200,6 +202,17 @@ npm link
 ```
 
 Now you can test `purgeport <port>` or `purgeport all` directly.
+
+## Contributing
+
+Contributions, issues, and feature requests are welcome!
+Please check our [Contributing Guide](CONTRIBUTING.md) before submitting pull requests.
+
+---
+
+## Security
+
+If you discover a potential security issue, please review our [Security Policy](SECURITY.md) for reporting guidelines.
 
 ---
 
